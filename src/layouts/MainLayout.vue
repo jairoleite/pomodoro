@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-promodoro">
+  <div class="layout-pomodoro">
     <div class="container">
       <header>
         <div class="logo">
