@@ -2,6 +2,8 @@
 
 pomodoro desenvolvido utilizando o vuejs
 
+https://vuejs.org/
+
 ## Install the dependencies
 ```bash
 npm install
