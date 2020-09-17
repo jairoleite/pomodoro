@@ -58,7 +58,7 @@ export default {
 </script>
 
 <style>
-.layout-promodoro {
+.layout-pomodoro {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -68,7 +68,7 @@ export default {
   background-color: #f05a56;
 }
 
-.layout-promodoro > .container {
+.layout-pomodoro > .container {
   width: 45%;
   height: 200px;
   margin-top: 5px;
