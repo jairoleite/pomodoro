@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-pomodoro">
+  <div class="layout-pomodoro" :style="'background-color:'+backgroundColor+'!important'">
     <div class="container">
       <header>
         <div class="logo">
@@ -27,20 +27,34 @@
         </div>
       </header>
 
+      <q-linear-progress :value="progress" color="white" class="q-mt-sm" />
+
       <div class="main">
         <div class="block-central">
           <div class="top-buttons">
-            <span class="top-buttons-selected">Pomodoro</span>
-            <span>Short Break</span>
-            <span>Long Break</span>
+            <span
+              :class="selectedTime == 'vinte' ? 'top-buttons-selected-1500' : ''"
+              @click="clickSelectCount(1500)"
+            >Pomodoro</span>
+            <span
+              :class="selectedTime == 'cinco' ? 'top-buttons-selected-300' : ''"
+              @click="clickSelectCount(300)"
+            >Short Break</span>
+            <span
+              :class="selectedTime == 'quinze' ? 'top-buttons-selected-900' : ''"
+              @click="clickSelectCount(900)"
+            >Long Break</span>
           </div>
 
           <div class="display">
-            <span>25:00</span>
+            <span>{{display}}</span>
           </div>
 
-          <button>
-            <span>START</span>
+          <button v-if="!start" @click="clickStart">
+            <span :style="'color:'+backgroundColor+'!important'">START</span>
+          </button>
+          <button v-else @click="clickStop" class="btn-pause">
+            <span :style="'color:'+backgroundColor+'!important'">STOP</span>
           </button>
         </div>
       </div>
@@ -49,110 +63,99 @@
 </template>
 
 <script>
+// we import all of `date`
+import { date } from "quasar";
+
 export default {
   name: "Pomodoro",
   data() {
-    return {};
+    return {
+      start: false,
+      selectedDisplay: 1500,
+      display: "25:00",
+      selectedTime: "vinte",
+      countTime: null,
+      backgroundColor: "#f05a56",
+      progress: 0.0,
+      total: 1500,
+    };
+  },
+  methods: {
+    clickStart() {
+      this.countdown();
+      this.start = true;
+    },
+    clickStop() {
+      this.start = false;
+    },
+
+    clickSelectCount(number) {
+      this.selectedDisplay = number;
+      this.total = number;
+      //mostra na tela a contagem
+      this.display =
+        number == 1500 ? "25:00" : number == 300 ? "05:00" : "15:00";
+      //menu selecionado
+      this.selectedTime =
+        number == 1500 ? "vinte" : number == 300 ? "cinco" : "quinze";
+      //cor de fundo
+      this.backgroundColor =
+        number == 1500 ? "#f05a56" : number == 300 ? "#4ca6a9" : "#498fc1";
+
+      //parar contagem
+      if (this.countTime) {
+        clearInterval(this.countTime);
+      }
+
+      //estado normal de start
+      this.start = false;
+    },
+
+    countdown() {
+      //diminui o primeiro segundo..
+      if (
+        this.display == "25:00" ||
+        this.display == "05:00" ||
+        this.display == "15:00"
+      ) {
+        this.selectedDisplay--;
+      }
+
+      this.countTime = setInterval(() => {
+        //se pausar mata o intervalo
+        if (!this.start) {
+          clearInterval(this.countTime);
+          return;
+        }
+
+        let min = parseInt(this.selectedDisplay / 60);
+        let seg = this.selectedDisplay % 60;
+
+        if (min < 10) {
+          min = "0" + min;
+          min = min.substr(0, 2);
+        }
+
+        if (seg <= 9) {
+          seg = "0" + seg;
+        }
+
+        this.display = min + ":" + seg;
+        this.selectedDisplay--;
+
+        //se estiver zerado para a contagem
+        if (this.display == "00:00") {
+          clearInterval(this.countTime);
+        }
+
+        let percent = ((this.total - this.selectedDisplay) * 100) / this.total;
+        this.progress = parseFloat(`0.${"" + String(percent).split(".")[0]}`);
+        // console.log(String(percent).split(".")[0]);
+        console.log(percent.toFixed());
+      }, 1000);
+    },
   },
 };
 </script>
 
-<style>
-.layout-pomodoro {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  width: 100%;
-  height: 100vh;
-  background-color: #f05a56;
-}
-
-.layout-pomodoro > .container {
-  width: 45%;
-  height: 200px;
-  margin-top: 5px;
-}
-
-.container > header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-header > .logo {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  font-family: "Varela Round", sans-serif;
-}
-
-header > .logo > span {
-  font-size: 19px;
-  margin-left: 2px;
-  color: white;
-  font-weight: 800;
-}
-
-.container > .main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  width: 100%;
-  height: 100px;
-  margin-top: 20px;
-  border-top: 1px solid #da524e;
-}
-
-.block-central {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
-
-  width: 75%;
-  margin-top: 30px;
-  background-color: #f16e6a;
-}
-
-.block-central > .top-buttons > span {
-  font-family: "Varela Round", sans-serif;
-  font-size: 16px;
-  margin-right: 10px;
-  padding: 3px;
-  border-radius: 7px;
-  color: white;
-}
-
-.top-buttons-selected {
-  background-color: #d15e5c;
-}
-
-.block-central > .display {
-  font-family: "Varela Round", sans-serif;
-  font-size: 130px;
-  font-weight: bold;
-  color: #da524e;
-}
-
-.block-central > button {
-  background: none;
-  border: 1px solid white;
-  background-color: white;
-  width: 200px;
-  height: 60px;
-  outline: none;
-  cursor: pointer;
-  border-radius: 5px;
-  border-bottom: 7px solid rgb(225, 225, 225);
-}
-
-.block-central > button > span {
-  font-family: "Varela Round", sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  color: #da524e;
-}
-</style>
+<style src="./style.css"></style>
